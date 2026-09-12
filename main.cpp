@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <string>
 #include <iostream>
 using namespace std;
 
@@ -51,23 +52,47 @@ void print_board(Board pos) {
     }
 }
 
-int main() {
-    Board board;
-    board.white_pawns   = (1ULL << a2) | (1ULL << b2) | (1ULL << c2) | (1ULL << d2) |
-                          (1ULL << e2) | (1ULL << f2) | (1ULL << g2) | (1ULL << h2);
-    board.white_knights = (1ULL << b1) | (1ULL << g1);
-    board.white_bishops = (1ULL << c1) | (1ULL << f1);
-    board.white_rooks   = (1ULL << a1) | (1ULL << h1);
-    board.white_queens  = (1ULL << d1);
-    board.white_king    = (1ULL << e1);
-    board.black_pawns   = (1ULL << a7) | (1ULL << b7) | (1ULL << c7) | (1ULL << d7) |
-                          (1ULL << e7) | (1ULL << f7) | (1ULL << g7) | (1ULL << h7);
-    board.black_knights = (1ULL << b8) | (1ULL << g8);
-    board.black_bishops = (1ULL << c8) | (1ULL << f8);
-    board.black_rooks   = (1ULL << a8) | (1ULL << h8);
-    board.black_queens  = (1ULL << d8);
-    board.black_king    = (1ULL << e8);
+Board parse_fen(string fen) {
+    Board pos = {};
+    int rank = 7;
+    int file = 0;
 
+    for (char c : fen) {
+        if (c == ' ') break;
+
+        if (c == '/') {
+            rank--;
+            file = 0;
+        }
+        else if (c >= '1' && c <= '8') {
+            file += c - '0';
+        }
+        else {
+            int square = rank * 8 + file;
+            uint64_t bit = 1ULL << square;
+
+            if      (c == 'P') pos.white_pawns   |= bit;
+            else if (c == 'N') pos.white_knights |= bit;
+            else if (c == 'B') pos.white_bishops |= bit;
+            else if (c == 'R') pos.white_rooks   |= bit;
+            else if (c == 'Q') pos.white_queens  |= bit;
+            else if (c == 'K') pos.white_king    |= bit;
+            else if (c == 'p') pos.black_pawns   |= bit;
+            else if (c == 'n') pos.black_knights |= bit;
+            else if (c == 'b') pos.black_bishops |= bit;
+            else if (c == 'r') pos.black_rooks   |= bit;
+            else if (c == 'q') pos.black_queens  |= bit;
+            else if (c == 'k') pos.black_king    |= bit;
+
+            file++;
+        }
+    }
+
+    return pos;
+}
+
+int main() {
+    Board board = parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     print_board(board);
     return 0;
 }
